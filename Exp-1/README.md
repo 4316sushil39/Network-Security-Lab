@@ -1,56 +1,94 @@
-# Experiment 1: Implement and Analyze Classical Symmetric Ciphers
+# Network Security Lab – Experiment 1
 
-## Objective
-To implement and analyze classical symmetric ciphers (Caesar and Vigenère) for encryption and decryption using Python.
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.x-3776AB?style=for-the-badge&logo=python" alt="Python 3" />
+  <img src="https://img.shields.io/badge/Encryption-Caesar%20%26%20Vigen%C3%A8re-00AEEF?style=for-the-badge" alt="Cipher Project" />
+  <img src="https://img.shields.io/badge/Status-Completed-success?style=for-the-badge" alt="Status" />
+</p>
 
-## Procedure
+A hands-on implementation of classical symmetric encryption techniques using Python. This experiment focuses on the Caesar cipher and the Vigenère cipher, comparing their working principles, strengths, weaknesses, and round-trip verification.
 
-### A. Caesar Cipher
-1. Open Python 3 in VS Code and run the Caesar cipher program.
-2. Provide the plaintext and the required shift value as input from the user.
+## Overview
+This project demonstrates how two foundational classical ciphers work in practice:
 
-> [**View Caesar Cipher Code**](Code/Caesar_cipher.py)
+- Caesar Cipher: uses a fixed shift value for all letters in a message
+- Vigenère Cipher: uses a repeating key to apply varying shifts across the plaintext
+
+The objective is to implement both ciphers, verify encryption and decryption logic, and analyze their security limitations in the context of modern cryptography.
+
+## Project Structure
+
+```text
+Exp-1/
+├── README.md
+├── Code/
+│   ├── Caesar_cipher.py
+│   └── vignere.py
+└── Outputs/
+    ├── Caesar.png
+    └── vignere.png
+```
+
+## Features
+- Interactive user input for plaintext and key/shift values
+- Encryption and decryption using modular arithmetic
+- Preservation of spaces, numbers, and punctuation
+- Verification of round-trip correctness using decryption comparison
+- Visual output captured in the project folder
+
+## 1. Caesar Cipher
+
+The Caesar cipher shifts each alphabetic character by a fixed number of positions. It is one of the simplest encryption methods and is easy to implement, but it is easily broken because the key space is extremely small.
+
+- File: [Code/Caesar_cipher.py](Code/Caesar_cipher.py)
+
+### Example Output
 
 ![Caesar cipher output](Outputs/Caesar.png)
 
-> **Caesar Cipher Output 1 - Encryption**
+### Working
+1. User enters plaintext and shift value.
+2. Each alphabetic character is shifted forward by the given amount.
+3. Decryption reverses the same shift to recover the original text.
 
-3. The program encrypts the plaintext using a fixed shift with modulo 26 logic while preserving spaces, numbers, and punctuation.
-4. The ciphertext is then decrypted using the reverse shift logic and compared with the original plaintext to verify correctness.
+## 2. Vigenère Cipher
 
-> **Caesar Cipher Output 2 - Decryption & Verification**
+The Vigenère cipher improves on Caesar by using a repeating keyword, so different letters are shifted by different amounts. This makes it more resistant to simple frequency analysis than a fixed-shift cipher.
 
-### B. Vigenère Cipher
-1. Run the Vigenère cipher program and provide the plaintext and an alphabetic key as input.
+- File: [Code/vignere.py](Code/vignere.py)
 
-> [**View Vigenère Cipher Code**](Code/vignere.py)
+### Example Output
 
 ![Vigenère cipher output](Outputs/vignere.png)
 
-> **Vigenère Cipher Output 1 - Encryption**
+### Working
+1. User enters plaintext and keyword.
+2. The key is repeated across the message.
+3. Each letter is shifted according to its matching key letter.
+4. Decryption uses the same key in reverse to restore the original text.
 
-2. The program encrypts the plaintext using the repeating key method, preserving spaces and punctuation without advancing the key position.
-3. The ciphertext is decrypted using the same key and the result is compared with the original plaintext for verification.
+## Security Discussion
 
-> **Vigenère Cipher Output 2 - Decryption & Verification**
+### Caesar Cipher
+- Very easy to implement
+- Small key space (only 25 possible shifts)
+- Vulnerable to brute-force attack
+- Vulnerable to frequency analysis
 
-4. Multiple test cases for both ciphers are executed to verify that the decrypted messages match the original messages.
+### Vigenère Cipher
+- More secure than the Caesar cipher
+- Uses multiple shifting values based on the key
+- Reduces repeated patterns in ciphertext
+- Still vulnerable if enough ciphertext is available and the key length is discovered
 
 ## Result
-The Caesar and Vigenère cipher programs were successfully implemented and executed in Python. Both programs performed encryption and decryption correctly. All 4 test cases produced correct round-trip results, giving a 100% verification success rate.
-
-## Discussion
-Both ciphers successfully performed encryption and decryption, with the decrypted messages matching exactly with the original plaintexts in all test cases.
-
-The Caesar cipher uses a single fixed shift for the entire message. This makes it simple to implement, but it is highly vulnerable to security attacks. Since there are only 25 possible keys, it can be easily broken by brute force. It is also vulnerable to frequency analysis because the same plaintext letter always becomes the same ciphertext letter.
-
-The Vigenère cipher is an improvement over the Caesar cipher. It uses a repeating keyword with different shift values, so the same plaintext letter is encrypted to different ciphertext letters. This reduces simple letter-frequency patterns and makes it more secure than the Caesar cipher. However, when sufficient ciphertext is available, it can still be attacked using methods such as Kasiski examination to find the key length.
-
-## Improvements
-
-**1. Caesar Cipher:** The program was modified and improved to accept plaintext and shift value dynamically from the user at runtime instead of using fixed hardcoded values. This makes the program interactive and flexible.
-
-**2. Vigenère Cipher:** The program was modified to accept plaintext and key as user input, making it interactive. Logic was also improved to preserve spaces and punctuation without advancing the key, ensuring accurate encryption and decryption.
+Both ciphers were successfully implemented and tested in Python. The decryption process matched the original plaintext in all validation cases, confirming the logic and correctness of the encryption schemes.
 
 ## Conclusion
-Thus, Caesar and Vigenère ciphers were successfully implemented in Python and verified through various test cases. This experiment helped in understanding the basic working of classical symmetric encryption techniques, their implementation logic using modulo arithmetic, and their security limitations compared to modern encryption algorithms.
+This experiment provided valuable insight into classical symmetric ciphers, their mathematical foundations, and the practical limitations of older encryption methods. While both are historically important, they are not secure by modern standards and are primarily useful for educational understanding and cryptographic analysis.
+
+## Author
+Sushil
+
+## License
+This project is for academic and learning purposes.
