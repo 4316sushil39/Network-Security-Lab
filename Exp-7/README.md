@@ -32,22 +32,22 @@ Only capture or inspect wireless traffic on networks and devices for which you h
 ### 1. EAPOL handshake messages
 The packet list shows EAPOL key packets identified as messages 1 through 4 of the handshake.
 
-![EAPOL handshake messages in Wireshark](Screenshots/Screenshot%202026-10-29%20123916.png)
+![EAPOL handshake messages in Wireshark](Screenshots/01-eapol-handshake.png)
 
 ### 2. Selected packet and 802.1X details
 The selected frame is decoded as IEEE 802.11 data carrying 802.1X authentication. The packet details show the EAPOL WPA key descriptor and identify the selected packet as message 1.
 
-![Selected EAPOL message details](Screenshots/Screenshot%202026-10-29%20123959.png)
+![Selected EAPOL message details](Screenshots/02-selected-eapol-message.png)
 
 ### 3. Packet protocol layers
 The packet details pane shows the protocol layers for the selected frame, including IEEE 802.11 data, Logical-Link Control, and 802.1X Authentication.
 
-![Packet protocol layers](Screenshots/Screenshot%202026-10-29%20124026.png)
+![Packet protocol layers](Screenshots/03-packet-protocol-layers.png)
 
 ### 4. Frame and wireless address fields
 The expanded frame and IEEE 802.11 sections show the captured frame metadata and wireless address fields for the selected packet.
 
-![Frame and wireless address fields](Screenshots/Screenshot%202026-10-29%20124054.png)
+![Frame and wireless address fields](Screenshots/04-wireless-frame-details.png)
 
 ## Observations
 - Wireshark decoded the exchange as EAPOL WPA key traffic.
