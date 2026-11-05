@@ -16,3 +16,4 @@ This repository contains the laboratory work for the Network Security Lab.
 5. [Experiment 5: TLS Handshake Analysis using Wireshark](./Exp-5)
 6. [Experiment 6: Establish Remote Login Using SSH](./Exp-6)
 7. [Experiment 7: Analyze WPA-2 Security and Capture the Handshake with Wireshark](./Exp-7)
+8. [Experiment 8: Public Key Generation, Exchange, Verification, and Secure Email](./Exp-8)
