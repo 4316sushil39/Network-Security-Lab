@@ -1,0 +1,177 @@
+# Experiment 9: IPsec VPN in Tunnel Mode with strongSwan
+
+## Aim
+To configure an IPsec VPN in tunnel mode between two Kali Linux gateways using strongSwan IKEv2 and analyze the protected traffic in Wireshark.
+
+## Theory
+IPsec provides confidentiality and integrity between network gateways. In tunnel mode, the complete original IP packet is encapsulated in a new IP header. IKEv2 establishes an IKE Security Association (SA) and authenticates the gateways. The resulting CHILD_SA uses ESP to encrypt and protect the actual data traffic.
+
+In this experiment:
+- Gateway A used outer address `192.168.188.129` and inner address `10.10.1.1/32`.
+- Gateway B used outer address `192.168.188.135` and inner address `10.20.1.1/32`.
+- The protected traffic was carried between `10.10.1.1/32` and `10.20.1.1/32`.
+- strongSwan used IKEv2 with a shared pre-shared key (PSK).
+- ESP with AES-GCM-256 was used for the CHILD_SA.
+
+## Tools Used
+- Two Kali Linux virtual machines
+- strongSwan / charon-systemd / swanctl
+- Linux XFRM networking tools
+- tcpdump
+- Wireshark
+- VMware virtual networking
+
+## Methodology
+
+### 1. Address and connectivity verification
+The outer interface and IP address were identified on both gateways. Gateway A and Gateway B were checked for direct reachability with `ping` and `ip route get` before configuring the tunnel.
+
+### 2. strongSwan installation and service verification
+strongSwan and supporting tools were installed on both gateways:
+
+```bash
+sudo apt update
+sudo apt install -y charon-systemd strongswan-swanctl tcpdump
+sudo systemctl enable --now strongswan
+```
+
+The service and daemon were verified with:
+
+```bash
+sudo systemctl status strongswan --no-pager
+sudo swanctl --version
+sudo swanctl --version --daemon
+```
+
+The evidence showed strongSwan `6.1.0` running with the charon-systemd daemon.
+
+### 3. Protected network configuration
+A loopback address was assigned on each gateway:
+
+```bash
+# Gateway A
+sudo ip address add 10.10.1.1/32 dev lo
+
+# Gateway B
+sudo ip address add 10.20.1.1/32 dev lo
+```
+
+The firewall rules were checked with `sudo nft list ruleset` to ensure IKE and ESP traffic were not blocked.
+
+### 4. strongSwan IKEv2 configuration
+The gateways were configured with mirrored traffic selectors:
+
+| Field | Gateway A | Gateway B |
+|---|---|---|
+| Local address | `192.168.188.129` | `192.168.188.135` |
+| Remote address | `192.168.188.135` | `192.168.188.129` |
+| IKE identity | `gw-a` | `gw-b` |
+| Local traffic selector | `10.10.1.1/32` | `10.20.1.1/32` |
+| Remote traffic selector | `10.20.1.1/32` | `10.10.1.1/32` |
+
+The IKE proposals used AES-GCM-256, SHA-256 PRF, and MODP3072. The CHILD_SA used ESP with AES-GCM-256. The PSK was kept secret and was not included in the repository or screenshots.
+
+The configuration was loaded on both gateways:
+
+```bash
+sudo swanctl --load-all
+sudo swanctl --list-conns 2>/dev/null
+```
+
+### 5. Tunnel initiation
+A packet capture was started on Gateway A before initiating the tunnel:
+
+```bash
+sudo tcpdump -ni eth0 -w exp9-ipsec.pcap \
+  'udp port 500 or udp port 4500 or proto 50 or proto 51'
+```
+
+The tunnel was initiated from Gateway A:
+
+```bash
+sudo swanctl --initiate --child lab-net 2>/dev/null
+```
+
+The IKE SA and CHILD SA were established successfully.
+
+### 6. Security Association and XFRM verification
+Both gateways were inspected with:
+
+```bash
+sudo swanctl --list-sas 2>/dev/null
+sudo ip xfrm state
+sudo ip xfrm policy
+```
+
+The Security Associations showed IKEv2 established and an installed tunnel-mode CHILD_SA using ESP/AES-GCM-256.
+
+### 7. Protected traffic test
+Gateway A and Gateway B were used to send ping traffic with their loopback addresses as the source:
+
+```bash
+# Gateway A
+ping -I 10.10.1.1 -c 4 10.20.1.1
+
+# Gateway B
+ping -I 10.20.1.1 -c 4 10.10.1.1
+```
+
+The counters in `swanctl --list-sas` were checked again to confirm that traffic increased the XFRM packet and byte counters.
+
+### 8. Packet analysis
+The capture was stopped and opened in Wireshark. The following display filter was used:
+
+```text
+isakmp || esp || ah || udp.port == 4500
+```
+
+The capture showed IKE_SA_INIT, IKE_AUTH, and ESP traffic between the two gateway addresses. NAT-T/UDP 4500 was used when the environment detected NAT. ESP protected the inner ICMP payload, while only outer gateway addresses and ESP metadata remained visible to the observer.
+
+## Screenshots
+
+The screenshots document the VM setup, address configuration, strongSwan service, tunnel, XFRM policy, ping traffic, and Wireshark analysis.
+
+| Evidence | Screenshot |
+|---|---|
+| strongSwan installation and service status | ![](Screenshots/Screenshot%202026-11-18%20101605.png) |
+| Address and routing setup | ![](Screenshots/Screenshot%202026-11-18%20103143.png) |
+| Gateway address configuration | ![](Screenshots/Screenshot%202026-11-18%20103204.png) |
+| strongSwan/configuration evidence | ![](Screenshots/Screenshot%202026-11-18%20103659.png) |
+| Tunnel-related command output | ![](Screenshots/Screenshot%202026-11-18%20103720.png) |
+| Security Association evidence | ![](Screenshots/Screenshot%202026-11-18%20103919.png) |
+| Tunnel or XFRM verification | ![](Screenshots/Screenshot%202026-11-18%20104049.png) |
+| Ping and counter verification | ![](Screenshots/Screenshot%202026-11-18%20104107.png) |
+| XFRM state/policy output | ![](Screenshots/Screenshot%202026-11-18%20104418.png) |
+| Packet capture or ping evidence | ![](Screenshots/Screenshot%202026-11-18%20104700.png) |
+| Wireshark capture view | ![](Screenshots/Screenshot%202026-11-18%20104722.png) |
+| Detailed Wireshark packet analysis | ![](Screenshots/Screenshot%202026-11-18%20105043.png) |
+| Final tunnel and capture evidence | ![](Screenshots/Screenshot%202026-11-18%20110252.png) |
+
+## Result
+The two Kali Linux gateways were configured as IPsec tunnel endpoints. The IKEv2 exchange established an IKE SA and CHILD_SA, and ping traffic between `10.10.1.1` and `10.20.1.1` crossed the tunnel using ESP. XFRM states and policies were installed on the gateways, and Wireshark captured the IKE and ESP packets.
+
+## Observations
+- strongSwan 6.1.0 and its charon-systemd daemon were running successfully.
+- Gateway A used `192.168.188.129`, and Gateway B used `192.168.188.135`.
+- The tunnel protected traffic between `10.10.1.1/32` and `10.20.1.1/32`.
+- The capture displayed IKEv2 negotiation messages and ESP packets.
+- ESP encrypted the inner ICMP payload while the outer gateway addresses remained visible.
+- NAT-T may be detected and carried ESP inside UDP 4500.
+
+## Conclusion
+This experiment successfully demonstrated a strongSwan IPsec tunnel in tunnel mode. IKEv2 authenticated and negotiated the gateways, while ESP protected traffic between their private loopback networks. Verification with `swanctl`, `ip xfrm state`, `ip xfrm policy`, ping, tcpdump, and Wireshark confirmed that the tunnel was active and carrying protected traffic.
+
+## Cleanup
+After saving the packet capture and screenshots, the tunnel and temporary loopback addresses can be removed:
+
+```bash
+sudo swanctl --terminate --child lab-net 2>/dev/null
+sudo ip address del 10.10.1.1/32 dev lo  # Gateway A
+sudo ip address del 10.20.1.1/32 dev lo  # Gateway B
+```
+
+## Security Note
+The pre-shared key must remain secret and must not be committed or shown in screenshots. The test should only be performed on authorized lab networks. Production deployments should use stronger certificate or enterprise authentication instead of a lab-only PSK.
+
+## Reference
+- [Experiment 9 procedure PDF](Experiment_9_IPsec_VPN_strongSwan_Kali_Procedure.pdf)
