@@ -129,23 +129,55 @@ The capture showed IKE_SA_INIT, IKE_AUTH, and ESP traffic between the two gatewa
 
 ## Screenshots
 
-The screenshots document the VM setup, address configuration, strongSwan service, tunnel, XFRM policy, ping traffic, and Wireshark analysis.
+The screenshots below are arranged in the order of the experiment. Each image is included once.
 
-| Evidence | Screenshot |
-|---|---|
-| strongSwan installation and service status | ![](Screenshots/Screenshot%202026-11-18%20101605.png) |
-| Address and routing setup | ![](Screenshots/Screenshot%202026-11-18%20103143.png) |
-| Gateway address configuration | ![](Screenshots/Screenshot%202026-11-18%20103204.png) |
-| strongSwan/configuration evidence | ![](Screenshots/Screenshot%202026-11-18%20103659.png) |
-| Tunnel-related command output | ![](Screenshots/Screenshot%202026-11-18%20103720.png) |
-| Security Association evidence | ![](Screenshots/Screenshot%202026-11-18%20103919.png) |
-| Tunnel or XFRM verification | ![](Screenshots/Screenshot%202026-11-18%20104049.png) |
-| Ping and counter verification | ![](Screenshots/Screenshot%202026-11-18%20104107.png) |
-| XFRM state/policy output | ![](Screenshots/Screenshot%202026-11-18%20104418.png) |
-| Packet capture or ping evidence | ![](Screenshots/Screenshot%202026-11-18%20104700.png) |
-| Wireshark capture view | ![](Screenshots/Screenshot%202026-11-18%20104722.png) |
-| Detailed Wireshark packet analysis | ![](Screenshots/Screenshot%202026-11-18%20105043.png) |
-| Final tunnel and capture evidence | ![](Screenshots/Screenshot%202026-11-18%20110252.png) |
+### 1. strongSwan installation and service status
+
+This shows strongSwan and tcpdump being installed, with the strongSwan service active and running.
+
+![strongSwan installation and service status](Screenshots/Screenshot%202026-11-18%20101605.png)
+
+### 2. Addressing and reachability test
+
+The Gateway B outer interface is assigned `192.168.188.135/24`, and the loopback address `10.20.1.1/32` is configured as the protected network behind it. Gateway A reaches Gateway B successfully, confirming basic connectivity before tunnel configuration.
+
+![Addressing and gateway reachability](Screenshots/Screenshot%202026-11-18%20103143.png)
+
+### 3. Configuration loaded successfully
+
+The swanctl configuration is loaded, and the `lab-vpn` IKEv2 connection is reported as successfully loaded.
+
+![strongSwan configuration loaded](Screenshots/Screenshot%202026-11-18%20103919.png)
+
+### 4. Gateway A connection definition
+
+The Gateway A connection shows `gw-a` as the local identity, `gw-b` as the remote identity, and traffic selectors `10.10.1.1/32` to `10.20.1.1/32`.
+
+![Gateway A connection definition](Screenshots/Screenshot%202026-11-18%20104049.png)
+
+### 5. Gateway B connection definition
+
+The mirrored Gateway B connection shows the reverse local and remote identities and traffic selectors.
+
+![Gateway B connection definition](Screenshots/Screenshot%202026-11-18%20104722.png)
+
+### 6. IKEv2 and CHILD_SA establishment
+
+This output confirms IKE_SA_INIT, IKE_AUTH, PSK authentication, the established IKE SA, and the installed CHILD_SA with ESP and AES-GCM-256.
+
+![Tunnel initiation and SA establishment](Screenshots/Screenshot%202026-11-18%20104107.png)
+
+### 7. XFRM states and tunnel policies
+
+The XFRM state and policy output shows inbound and outbound ESP states, tunnel selectors, and the `10.10.1.1/32` to `10.20.1.1/32` traffic path.
+
+![XFRM states and policies](Screenshots/Screenshot%202026-11-18%20104418.png)
+
+### 8. Protected traffic in Wireshark
+
+The packet capture shows IKEv2, NAT-T/UDP 4500, and ESP traffic between the gateway addresses. The Encapsulating Security Payload content does not reveal the inner ICMP payload.
+
+![Wireshark IPsec packet analysis](Screenshots/Screenshot%202026-11-18%20105043.png)
 
 ## Result
 The two Kali Linux gateways were configured as IPsec tunnel endpoints. The IKEv2 exchange established an IKE SA and CHILD_SA, and ping traffic between `10.10.1.1` and `10.20.1.1` crossed the tunnel using ESP. XFRM states and policies were installed on the gateways, and Wireshark captured the IKE and ESP packets.
