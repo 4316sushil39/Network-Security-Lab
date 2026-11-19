@@ -127,6 +127,31 @@ isakmp || esp || ah || udp.port == 4500
 
 The capture showed IKE_SA_INIT, IKE_AUTH, and ESP traffic between the two gateway addresses. NAT-T/UDP 4500 was used when the environment detected NAT. ESP protected the inner ICMP payload, while only outer gateway addresses and ESP metadata remained visible to the observer.
 
+## Improvements Made During the Experiment
+
+The following improvements were applied while completing the experiment to make the configuration reliable and easier to verify:
+
+- Added loopback `/32` addresses (`10.10.1.1` on Gateway A and `10.20.1.1` on Gateway B) so that protected traffic had fixed source and destination addresses.
+- Used mirrored traffic selectors and matching identities on both gateways to ensure that inbound and outbound policies were consistent.
+- Verified direct Gateway A-to-Gateway B connectivity and inspected the firewall rules before tunnel initiation.
+- Enabled and checked the `strongswan` service with `charon-systemd`, and confirmed the strongSwan/charon version before configuration.
+- Used `2>/dev/null` for `swanctl` verification commands to hide harmless local CLI plugin warnings while retaining the daemon's real status output.
+- Reloaded all connections with `sudo swanctl --load-all` after configuration changes and checked the loaded connection on both gateways.
+- Captured UDP ports 500 and 4500 plus ESP/AH protocols so IKEv2 negotiation and NAT-T traffic were recorded along with the protected ESP packets.
+- Bound ping traffic to the loopback source addresses and rechecked Security Association counters, XFRM states, and XFRM policies to prove that traffic passed through the tunnel.
+- Added cleanup steps to terminate the CHILD_SA and remove the temporary loopback addresses after the experiment.
+
+## Improvements
+
+The lab can be extended beyond the completed test in the following ways:
+
+- Replace the shared PSK with certificate-based authentication to avoid distributing one shared secret to both gateways.
+- Use separate private LAN subnets behind each gateway instead of loopback `/32` addresses to model a site-to-site VPN more realistically.
+- Apply explicit firewall rules that allow only the required IKE and ESP traffic, including UDP 4500 when NAT-T is in use.
+- Test tunnel recovery by restarting the strongSwan service or briefly interrupting connectivity, then verify that the SAs are re-established.
+- Record packet and byte counters before and after larger test transfers, and compare the results with the Wireshark capture to document tunnel behavior.
+- Save the final connection configuration securely and verify service startup and tunnel behavior after reboot; keep secrets out of the repository and screenshots.
+
 ## Screenshots
 
 The screenshots below are arranged in the order of the experiment. Each image is included once.

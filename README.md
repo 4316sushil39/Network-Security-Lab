@@ -18,3 +18,4 @@ This repository contains the laboratory work for the Network Security Lab.
 7. [Experiment 7: Analyze WPA-2 Security and Capture the Handshake with Wireshark](./Exp-7)
 8. [Experiment 8: Public Key Generation, Exchange, Verification, and Secure Email](./Exp-8)
 9. [Experiment 9: IPsec VPN in Tunnel Mode with strongSwan](./Exp-9)
+10. [Experiment 10: Firewall and Intrusion Detection Setup with pfSense and Snort](./Exp-10)
